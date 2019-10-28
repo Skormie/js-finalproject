@@ -13,27 +13,30 @@ loadScript("./js/game.js");
 
 window.onload = function(event) {
 	"use strict";
-	//gameEngineThis = this;
 
-	// window.requestAnimationFrame =
-	// 	window.requestAnimationFrame ||
-	// 	function(callback) {
-	// 		window.setTimeout(callback, 16);
-	// 	};
+	document.getElementById("btn_game1").addEventListener("click", () => {
+		if (document.getElementById("game1").style.display != "none")
+			document.getElementById("game1").style.display = "none";
+		else document.getElementById("game1").style.display = "block";
+		document.getElementById("game2").style.display = "none";
+		document.getElementById("game3").style.display = "none";
+	});
 
-	// if (!window.requestAnimationFrame) {
-	// 	window.requestAnimationFrame = (function() {
-	// 		return (
-	// 			window.webkitRequestAnimationFrame ||
-	// 			window.mozRequestAnimationFrame ||
-	// 			window.oRequestAnimationFrame ||
-	// 			window.msRequestAnimationFrame ||
-	// 			function(callback, fps) {
-	// 				window.setTimeout(callback, 1000 / 60); // frames per second
-	// 			}
-	// 		);
-	// 	})();
-	// }
+	document.getElementById("btn_game2").addEventListener("click", () => {
+		if (document.getElementById("game2").style.display != "none")
+			document.getElementById("game2").style.display = "none";
+		else document.getElementById("game2").style.display = "block";
+		document.getElementById("game1").style.display = "none";
+		document.getElementById("game3").style.display = "none";
+	});
+
+	document.getElementById("btn_game3").addEventListener("click", () => {
+		if (document.getElementById("game3").style.display != "none")
+			document.getElementById("game3").style.display = "none";
+		else document.getElementById("game3").style.display = "block";
+		document.getElementById("game2").style.display = "none";
+		document.getElementById("game1").style.display = "none";
+	});
 
 	var keyPressed = e => controller.keyPressed(e.type, e.keyCode);
 
@@ -47,18 +50,8 @@ window.onload = function(event) {
 	};
 
 	var draw = function(lagOffset, elapsed) {
-		//update();
 		view.clearCanvas(game.world.player.x, game.world.player.y, game.world.player.velocity_x);
-		view.drawPlayer(
-			game.world.player.x,
-			game.world.player.y,
-			game.world.player.width,
-			game.world.player.height,
-			game.world.player.color,
-			lagOffset,
-			elapsed
-		);
-		view.translateCanvas(game.world.player.x, game.world.player.y /*, core.time, core.fps*/);
+		view.translateCanvas(game.world.player.x, game.world.player.y);
 		view.drawBackground(
 			game.world.player.x,
 			game.world.player.y,
@@ -68,31 +61,19 @@ window.onload = function(event) {
 			lagOffset,
 			elapsed
 		);
-		//view.translateCanvas(game.world.player.x, game.world.player.y /*, core.time, core.fps*/);
+		view.drawPlayer(
+			game.world.player.x,
+			game.world.player.y,
+			game.world.player.width,
+			game.world.player.height,
+			game.world.player.color,
+			lagOffset,
+			elapsed
+		);
 		view.draw(game.world.player.x, game.world.player.y, game.world.player.velocity_x);
-		//requestAnimationFrame(draw);
-		//window.requestAnimationFrame(() => draw());
-		//window.cancelAnimationFrame(requestID);
-		//requestID = undefined;
-		//requestID = window.requestAnimationFrame(draw);
 	};
 
-	// var draw = function(lagOffset, elapsed) {
-	// 	//view.clearCanvas("#000000");
-	// 	view.bigDraw(
-	// 		game.world.player.x,
-	// 		game.world.player.y,
-	// 		game.world.player.width,
-	// 		game.world.player.height,
-	// 		game.world.player.color,
-	// 		lagOffset,
-	// 		elapsed
-	// 	);
-	// 	//view.translateCanvas(game.world.player.x, game.world.player.y /*, core.time, core.fps*/);
-	// 	//view.draw(game.world.player.x, game.world.player.y, game.world.player.velocity_x);
-	// };
-
-	var update = function(l, e) {
+	var update = function() {
 		if (controller.left.active) game.world.player.moveLeft();
 		if (controller.right.active) game.world.player.moveRight();
 		if (controller.camLeft.active) view.translateCanvasLeft();
@@ -101,10 +82,11 @@ window.onload = function(event) {
 		if (controller.zoomOut.active) view.zoomOut();
 		if (controller.up.active) {
 			game.world.player.jump();
-			controller.up.active = false;
+		} else if (!controller.up.active) {
+			game.world.player.upForce = 0;
 		}
 
-		game.update(l, e);
+		game.update();
 	};
 
 	//Objects
@@ -121,7 +103,6 @@ window.onload = function(event) {
 	window.onresize = resize;
 
 	resize();
-	//draw();
 
 	core.start();
 };

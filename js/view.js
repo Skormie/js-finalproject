@@ -2,7 +2,7 @@ const View = function(canvas) {
 	this.tctx = document.createElement("canvas").getContext("2d");
 	this.ctx = canvas.getContext("2d");
 	var data =
-		'<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"> \
+		'<svg width="600px" height="600px" xmlns="http://www.w3.org/2000/svg"> \
 <defs> \
 	<pattern id="smallGrid" width="8" height="8" patternUnits="userSpaceOnUse"> \
 		<path d="M 8 0 L 0 0 0 8" fill="none" stroke="gray" stroke-width="0.5" /> \
@@ -12,7 +12,7 @@ const View = function(canvas) {
 		<path d="M 80 0 L 0 0 0 80" fill="none" stroke="gray" stroke-width="1" /> \
 	</pattern> \
 </defs> \
-<rect width="100%" height="100%" fill="url(#smallGrid)" /> \
+<rect width="600px" height="600px" fill="url(#smallGrid)" /> \
 </svg>';
 
 	var DOMURL = window.URL || window.webkitURL || window;
@@ -26,29 +26,13 @@ const View = function(canvas) {
 	};
 	img.src = url;
 
-	this.clearCanvas = (x, y, vx) => {
-		// this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-		// this.tctx.setTransform(1, 0, 0, 1, 0, 0);
-		// this.tctx.clearRect(0, 0, this.tctx.canvas.width, this.tctx.canvas.height);
-		// this.tctx.save();
-		//
-		//this.tctx.setTransform(1, 0, 0, 1, 0, 0);
+	this.clearCanvas = () => {
 		this.tctx.resetTransform();
 		this.tctx.fillStyle = "#000000";
 		this.tctx.fillRect(0, 0, this.tctx.canvas.width, this.tctx.canvas.width);
 
-		if (img) {
-			this.tctx.drawImage(img, 0, 0);
-		}
-
 		this.tctx.fillStyle = "#FF0000";
 		this.tctx.fillRect(150, 56, 8, 8);
-		//var camX = this.tctx.canvas.width / 2; //Where we want to be.
-		//var camY = this.tctx.canvas.height / 2;
-		//console.log(Math.round(camX), Math.round(x));
-		//var huh = camX / x;
-		//this.tctx.fillRect(Math.round(camX) + vx * huh, Math.round(camY), 16, 16);
-		//this.tctx.restore();
 	};
 
 	var oldX = 150;
@@ -61,67 +45,26 @@ const View = function(canvas) {
 		this.tctx.fillRect(150, 56, width / 2, height / 2);
 		this.tctx.fillStyle = color;
 		//console.log(x, y);
-		this.tctx.fillRect(Math.round(x + camX), Math.round(y + camY), width, height);
+		this.tctx.fillRect(Math.round(x + camX - 8), Math.round(y + camY - 8), width, height);
 		this.tctx.fillStyle = "#FF0000";
 		objects.forEach(({ x, y }) => this.tctx.fillRect(x - 5, y - 5, 10, 10));
 	};
+
 	this.drawBackground = (x, y, width, height, color) => {
+		if (img) {
+			this.tctx.drawImage(img, 0, 0);
+		}
 		var camX = -x + this.tctx.canvas.width / 2; //Where we want to be.
 		var camY = -y + this.tctx.canvas.height / 2;
 		this.tctx.fillStyle = color;
 		this.tctx.fillRect(150, 56, width / 2, height / 2);
 		this.tctx.fillRect(140, 56, width / 2, height / 2);
 		this.tctx.fillStyle = color;
-		console.log(x, y);
+		//console.log(x, y);
 		this.tctx.fillRect(Math.round(x + camX), Math.round(y + camY), width, height);
 		this.tctx.fillStyle = "#FF0000";
 		objects.forEach(({ x, y }) => this.tctx.fillRect(x - 5, y - 5, 10, 10));
-	};
-
-	this.bigDraw = (x, y, width, height, color, lagOffset) => {
-		//Reset Canvas
-		this.tctx.resetTransform();
-		this.tctx.fillStyle = "#000000";
-		this.tctx.fillRect(0, 0, this.tctx.canvas.width, this.tctx.canvas.width);
-		this.tctx.fillStyle = "#FF0000";
-		this.tctx.fillRect(150, 56, 8, 8);
-		this.tctx.fillRect(Math.round(x), Math.round(y), width, height);
-
-		//Translate Camera
-		//var delta = Date.now() - lastTs;
-		//lastTs = Date.now();
-		//console.log(x, y);
-		//time = (delta / 60) * smoothCamera; // This is like deltatime.
-		var camX = -x + this.tctx.canvas.width / 2; //Where we want to be.
-		var camY = -y + this.tctx.canvas.height / 2;
-		cam_posX = this.lerp(cam_posX, camX, lagOffset); // Smooth camera
-		cam_posY = this.lerp(cam_posY, camY, lagOffset);
-		this.tctx.translate(Math.round(cam_posX), Math.round(cam_posY));
-		//this.tctx.resetTransform();
-		this.tctx.translate(Math.round(camX), Math.round(camY));
-
-		//Draw Player
-		this.tctx.fillStyle = color;
-		this.tctx.fillRect(150, 56, width / 2, height / 2);
-		this.tctx.fillStyle = color;
-		//this.tctx.fillRect(Math.trunc(x), Math.trunc(y), width, height);
-		//this.tctx.fillRect(this.tctx.canvas.width/2, this.tctx.canvas.height/2, width, height);
-		this.tctx.fillRect(Math.round(x), Math.round(y), width, height);
-		this.tctx.fillStyle = "#FF0000";
-		objects.forEach(({ x, y }) => this.tctx.fillRect(x - 5, y - 5, 10, 10));
-
-		//Draw Image
-		this.ctx.drawImage(
-			this.tctx.canvas,
-			0,
-			0,
-			this.tctx.canvas.width,
-			this.tctx.canvas.height,
-			0,
-			0,
-			this.ctx.canvas.width,
-			this.ctx.canvas.height
-		);
+		this.tctx.restore();
 	};
 
 	// let cnt = 0;
@@ -151,17 +94,17 @@ const View = function(canvas) {
 	var cam_posY = 75;
 	var lastTs = Date.now();
 	this.translateCanvas = function(x, y, time) {
+		this.tctx.save();
 		var delta = Date.now() - lastTs;
 		lastTs = Date.now();
-		//console.log(x, y);
-
 		time = (delta / 60) * smoothCamera; // This is like deltatime.
+
 		var camX = -x + this.tctx.canvas.width / 2; //Where we want to be.
 		var camY = -y + this.tctx.canvas.height / 2;
-		cam_posX = this.lerp(cam_posX, camX, time); // Smooth camera
+		cam_posX = this.lerp(cam_posX, camX, time);
 		cam_posY = this.lerp(cam_posY, camY, time);
-		//this.tctx.translate(Math.round(cam_posX), Math.round(cam_posY));
-		this.tctx.translate(Math.round(camX), Math.round(camY));
+		//this.tctx.translate(Math.round(cam_posX), Math.round(cam_posY)); //Smooth Camera
+		this.tctx.translate(Math.round(camX - 8), Math.round(camY - 8)); //Snappy Camera
 	};
 
 	this.lerp = function(v0, v1, t) {
@@ -242,6 +185,8 @@ const View = function(canvas) {
 		// this.ctx.restore();
 		this.ctx.imageSmoothingEnabled = false;
 		this.ctx.globalCompositeOperation = "copy";
+		this.ctx.shadowBlur = 20;
+		this.ctx.shadowColor = "black";
 		//this.tctx.imageSmoothingEnabled = false;
 		//this.tctx.globalCompositeOperation = "copy";
 	};

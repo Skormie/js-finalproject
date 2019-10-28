@@ -2,16 +2,31 @@
 <html>
 	<head>
 		<meta name="viewport" content="user-scalable=no,width=device-width" />
+		<link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet" />
 		<link href="css/style.css" rel="stylesheet" type="text/css" />
-		<title>Console Quest Game</title>
+		<title>CIT190 Games</title>
 	</head>
 	<body>
-		<canvas></canvas>
+		<h1>CIT190 Game Interface</h1>
+		<div class="container">
+			<button id="btn_game1">Console Quest 64</button>
+			<button id="btn_game2">Clicker Game</button>
+			<button id="btn_game3">Maze Game</button>
+		</div>
+		<div id="game1">
+			<canvas></canvas>
+			<p>2D side scrolling game with story elements and potential 2D action.</p>
+		</div>
+		<div id="game2">
+			<iframe src="http://167.71.253.28/Gam/"></iframe>
+			<p>A 2D game where you click monsters to destroy them and load new levels.</p>
+		</div>
+		<div id="game3">
+			<img src="media/game.png" id="game" />
+			<p>A game were you travel through mazes and try to get to the end without dying.</p>
+		</div>
 		<!--<canvas width="300" height="150" style="border:1px solid #000000;"></canvas>-->
-		<!--<script type="text/javascript" src="js/controller.js"></script>
-		<script type="text/javascript" src="js/view.js"></script>
-		<script type="text/javascript" src="js/engine.js"></script>
-		<script type="text/javascript" src="js/game.js"></script>-->
 		<script type="text/javascript" src="js/main.js"></script>
+		<footer>©2019 Jason Luckhardt All Rights Reserved.</footer>
 	</body>
 </html>

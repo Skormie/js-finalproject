@@ -11,10 +11,13 @@ const Controller = function() {
 		var down = type == "keydown";
 
 		if (key_code == 37) {
+			//Left
 			this.left.getInput(down);
 		} else if (key_code == 32) {
+			//Space
 			this.up.getInput(down);
 		} else if (key_code == 39) {
+			//Right
 			this.right.getInput(down);
 		}
 

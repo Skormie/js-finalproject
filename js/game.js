@@ -1,7 +1,5 @@
 const Game = function() {
 	this.world = {
-		background_color: "rgba(40,48,56,0.25)",
-
 		friction: 0.7,
 		gravity: 3,
 
@@ -29,12 +27,13 @@ const Game = function() {
 		},
 
 		update: function(l, e) {
-			this.player.velocity_y += this.gravity;
+			this.player.velocity_y += this.gravity - this.player.upForce;
 			//console.log(l);
-			this.player.update(l, e);
+			this.player.update();
 
 			this.player.velocity_x *= this.friction;
 			this.player.velocity_y *= this.friction;
+			console.log(this.player.y);
 
 			this.collideObject(this.player);
 		}
@@ -51,6 +50,7 @@ Game.Player = function(x, y) {
 	this.color = "#ff0000";
 	this.height = 16;
 	this.jumping = true;
+	this.upForce = 0;
 	this.velocity_x = 0;
 	this.velocity_y = 0;
 	this.width = 16;
@@ -64,7 +64,7 @@ Game.Player.prototype = {
 	constructor: Game.Player,
 
 	jump: function() {
-		if (!this.jumping) {
+		if (!this.jumping && !this.upForce) {
 			this.color = "#" + Math.floor(Math.random() * 16777216).toString(16);
 			if (this.color.length != 7) {
 				this.color = this.color.slice(0, 1) + "0" + this.color.slice(1, 6);
@@ -72,6 +72,9 @@ Game.Player.prototype = {
 
 			this.jumping = true;
 			this.velocity_y -= 20;
+		} else if (this.jumping && !this.upForce && this.velocity_y < 0) {
+			this.upForce = 1.5;
+			this.velocity_y -= 5.5;
 		}
 	},
 

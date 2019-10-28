@@ -10,6 +10,7 @@ html {
 }
 
 body {
+	background-image: url("../media/background.png");
 	align-content: center;
 	align-items: space-around;
 	background-color: #202830;
@@ -19,38 +20,80 @@ body {
 	width: 100%;
 }
 
+h1 {
+	margin-top: 50px;
+	color: #ffffff;
+	font-family: "Ubuntu", sans-serif;
+	font-size: 40px;
+}
+
+footer {
+	color: #ffffff;
+	font-family: "Ubuntu", sans-serif;
+	font-size: 12px;
+}
+
 canvas {
 	image-rendering: -moz-crisp-edges;
 	image-rendering: -webkit-crisp-edges;
 	image-rendering: pixelated;
 }
 
-#menu {
-	background-color: rgba(0, 0, 0, 0.5);
-	color: #ffffff;
-	cursor: pointer;
-	display: grid;
-	max-height: 100%;
-	overflow-y: auto;
-	padding: 8px;
-	position: fixed;
-	right: 0px;
-	top: 0px;
-	user-select: none;
-	-webkit-tap-highlight-color: transparent;
+iframe {
+	width: 100%;
+	height: 1000px;
 }
 
-#menu p {
+button {
+	display: inline-block;
+	padding: 5px 5px;
+	border: 1px solid #ffffff;
+	margin: 1px 5px 5px 1px;
+	border-radius: 0.12em;
+	box-sizing: border-box;
+	text-decoration: none;
+	font-family: "Roboto", sans-serif;
+	font-weight: 300;
+	font-size: 24px;
 	color: #ffffff;
-	font-size: 2em;
+	background-color: #222222;
+	text-align: center;
+	transition: all 0.2s;
 }
 
-#menu-list {
+button:hover {
+	color: #000000;
+	background-color: #ffffff;
+}
+
+.container {
+	width: 100%;
+	float: left;
+	text-align: center;
+}
+.container button {
+	display: inline-block;
+}
+
+#game1,
+#game3 {
 	display: none;
 }
 
-#menu-list a {
+#game2 {
+	width: 100%;
+}
+
+[id^="game"] {
 	color: #ffffff;
-	font-size: 1.5em;
-	text-decoration: none;
+	font-family: "Ubuntu", sans-serif;
+	font-size: 24px;
+	text-align: center;
+}
+
+@media all and (max-width: 30em) {
+	button {
+		display: block;
+		margin: 0.4em auto;
+	}
 }
