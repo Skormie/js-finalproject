@@ -33,7 +33,6 @@ const Game = function() {
 
 			this.player.velocity_x *= this.friction;
 			this.player.velocity_y *= this.friction;
-			console.log(this.player.y);
 
 			this.collideObject(this.player);
 		}

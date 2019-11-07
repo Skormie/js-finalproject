@@ -82,6 +82,7 @@ button:hover {
 
 #game2 {
 	width: 100%;
+	display: none;
 }
 
 [id^="game"] {

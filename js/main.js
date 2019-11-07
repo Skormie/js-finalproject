@@ -10,32 +10,44 @@ loadScript("./js/controller.js");
 loadScript("./js/view.js");
 loadScript("./js/core.js");
 loadScript("./js/game.js");
+loadScript("./js/clicker.js");
 
 window.onload = function(event) {
 	"use strict";
+	var clickgame;
+	var game1 = document.getElementById("game1");
+	var game2 = document.getElementById("game2");
+	var game3 = document.getElementById("game3");
+	game1.style.display = "none"; // For whatever reason I have to do this for the button to work on first click.
+	game2.style.display = "none";
+	game3.style.display = "none";
 
 	document.getElementById("btn_game1").addEventListener("click", () => {
-		if (document.getElementById("game1").style.display != "none")
-			document.getElementById("game1").style.display = "none";
-		else document.getElementById("game1").style.display = "block";
-		document.getElementById("game2").style.display = "none";
-		document.getElementById("game3").style.display = "none";
+		if (game1.style.display != "none") game1.style.display = "none";
+		else game1.style.display = "block";
+		game2.style.display = "none";
+		game3.style.display = "none";
 	});
 
 	document.getElementById("btn_game2").addEventListener("click", () => {
-		if (document.getElementById("game2").style.display != "none")
-			document.getElementById("game2").style.display = "none";
-		else document.getElementById("game2").style.display = "block";
-		document.getElementById("game1").style.display = "none";
-		document.getElementById("game3").style.display = "none";
+		console.log(game2.style.display);
+		if (game2.style.display != "none") {
+			game2.style.display = "none";
+		} else {
+			game2.style.display = "block";
+			if (typeof clickgame === "undefined") {
+				clickgame = new Clicker();
+			}
+		}
+		game1.style.display = "none";
+		game3.style.display = "none";
 	});
 
 	document.getElementById("btn_game3").addEventListener("click", () => {
-		if (document.getElementById("game3").style.display != "none")
-			document.getElementById("game3").style.display = "none";
-		else document.getElementById("game3").style.display = "block";
-		document.getElementById("game2").style.display = "none";
-		document.getElementById("game1").style.display = "none";
+		if (game3.style.display != "none") game3.style.display = "none";
+		else game3.style.display = "block";
+		game2.style.display = "none";
+		game1.style.display = "none";
 	});
 
 	var keyPressed = e => controller.keyPressed(e.type, e.keyCode);
