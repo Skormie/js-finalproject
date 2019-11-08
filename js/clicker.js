@@ -5,76 +5,13 @@ const Clicker = function() {
 	let context = canvas.getContext("2d");
 	let bCanvas = document.createElement("canvas");
 	let bContext = bCanvas.getContext("2d");
-	let worldHeight = 135 * 2;
-	let worldWidth = 256 * 2;
-
-	this.sprite = o => {
-		let sprite = {};
-		sprite._frameIndex = 0;
-		sprite._tick = 0;
-		sprite._frameTicks = o._frameTicks || 0;
-		sprite._frameLength = o._frameLength || 1;
-
-		sprite.context_ = o.context_;
-		sprite._width = o._width;
-		sprite._height = o._height;
-		sprite._loc = { x: o._x, y: o._y };
-		sprite.array = new Array();
-		sprite._image = new Image();
-		sprite._image.src = `./media/clicker/monster/${o._resource}.png`;
-		sprite._xmlhttp = new XMLHttpRequest();
-		sprite.frames;
-		sprite.renderReady = false;
-
-		sprite._xmlhttp.onreadystatechange = function() {
-			if (this.readyState == 4 && this.status == 200) {
-				sprite.frames = JSON.parse(this.responseText).frames;
-				sprite._frameLength = Object.keys(sprite.frames).length; // Size of the object.
-				for (var name in sprite.frames) sprite.array.push(name);
-				console.log(sprite.array);
-				sprite.renderReady = true; // Image Loaded Ready for render.
-				delete sprite._xmlhttp; //remove this since we don't need it anymore.
-			}
-		};
-		sprite._xmlhttp.open("GET", `./media/clicker/monster/${o._resource}.json`, true);
-		sprite._xmlhttp.send();
-
-		sprite.update = function() {
-			sprite._tick += 1;
-
-			if (sprite._tick > sprite._frameTicks) {
-				sprite._tick = 0;
-				sprite._frameIndex++;
-				sprite._frameIndex %= sprite._frameLength;
-				console.log(sprite._frameIndex);
-			}
-		};
-
-		sprite.render = function() {
-			if (!sprite.renderReady) return;
-			//sprite.context.clearRect(0, 0, that.width, that.height);
-			//console.log(this);
-			//console.log(sprite);
-			let name = this.array[sprite._frameIndex];
-			//console.log(this.array[sprite._frameIndex]);
-			//console.log(sprite.frames[name]);
-			bContext.drawImage(
-				sprite._image,
-				sprite.frames[name].frame.x,
-				sprite.frames[name].frame.y,
-				sprite.frames[name].frame.w,
-				sprite.frames[name].frame.h,
-				sprite._loc.x, // Might make this a parameter at render.
-				sprite._loc.y, // Might make this a parameter at render.
-				sprite._width,
-				sprite._height
-			);
-		};
-
-		return sprite;
-	};
-
-	//bird.render();
+	let background = new Image();
+	let clickable = new Array();
+	let damage = 10;
+	let deltatime = 0;
+	background.src = "./media/clicker/background/parallax-mountain.png";
+	this.worldHeight = 135 * 2;
+	this.worldWidth = 256 * 2;
 
 	this.getCursorPosition = (canvas, event) => {
 		let rect = canvas.getBoundingClientRect();
@@ -87,8 +24,7 @@ const Clicker = function() {
 
 	this.clearCanvas = () => {
 		bContext.resetTransform();
-		bContext.fillStyle = "#000000";
-		bContext.fillRect(0, 0, bContext.canvas.width, bContext.canvas.height);
+		bContext.drawImage(background, 0, 0, bContext.canvas.width, bContext.canvas.height); // Each frame I'm rewriting the canvas with the background image.
 		bContext.fillStyle = "#FF0000";
 		bContext.fillRect(150, 56, 8, 8);
 	};
@@ -116,26 +52,18 @@ const Clicker = function() {
 		);
 	};
 
-	var bird = this.sprite({
-		context_: bContext,
-		_width: 122,
-		_height: 114,
-		_x: 100,
-		_y: 100,
-		_frameTicks: 10,
-		_resource: "bird"
-	});
-
-	this.Update = progress => {
+	this.Update = deltatime => {
 		// Update the state of the world for the elapsed time since last render
-		bird.update();
-		bird.render();
+		birdMonster.sprite.update();
+		birdMonster.sprite.render(birdMonster.loc.x, birdMonster.loc.y);
+		birdMonster.renderHp();
 	};
 
 	this.Loop = timestamp => {
-		var progress = timestamp - lastRender;
+		deltatime = timestamp - lastRender;
 		//console.log("loop test");
-		this.Update(progress);
+		deltatime = min(deltatime, 0.15);
+		this.Update(deltatime);
 		this.Draw();
 		this.clearCanvas();
 
@@ -145,17 +73,38 @@ const Clicker = function() {
 
 	canvas.addEventListener("mousedown", function(e) {
 		let coord = self.getCursorPosition(canvas, e);
+		clickable.forEach(element => {
+			if (
+				// Checking if the clicked location is within our clickable objects area.
+				coord.x >= element.loc.x &&
+				coord.x <= element.loc.x + element.width &&
+				coord.y >= element.loc.y &&
+				coord.y <= element.loc.y + element.height
+			) {
+				// Here I'm getting the current clicked pixel and checking if it is alpha.
+				let pixel = element.frame.getImageData(coord.x - element.loc.x, coord.y - element.loc.y, 1, 1).data;
+				console.log(element.frame);
+				if (pixel[3]) {
+					console.log("HIT");
+					if (element.hasOwnProperty("health")) {
+						console.log("Has HP");
+						if (element.health > 0) element.health -= damage;
+						else if (element.health < 0) element.health = 0;
+					}
+				}
+			}
+		});
 		self.DrawSquare(coord.x, coord.y, 8, 8);
 	});
 
 	this.Resize = (width, height, height_width_ratio) => {
 		let dpi = window.devicePixelRatio;
 		if (height / width > height_width_ratio) {
-			canvas.setAttribute("height", Math.floor(width * height_width_ratio));
-			canvas.setAttribute("width", Math.floor(width));
+			canvas.height = Math.floor(width * height_width_ratio);
+			canvas.width = Math.floor(width);
 		} else {
-			canvas.setAttribute("height", Math.floor(height));
-			canvas.setAttribute("width", Math.floor(height / height_width_ratio));
+			canvas.height = Math.floor(height);
+			canvas.width = Math.floor(height / height_width_ratio);
 		}
 		context.imageSmoothingEnabled = false;
 		context.globalCompositeOperation = "copy";
@@ -163,17 +112,154 @@ const Clicker = function() {
 		context.shadowColor = "black";
 	};
 
-	function getRelativeCoords(params) {
-		return { x: event.offsetX, y: event.offsetY };
-	}
+	bCanvas.width = this.worldWidth;
+	bCanvas.height = this.worldHeight;
 
-	bCanvas.width = worldWidth;
-	bCanvas.height = worldHeight;
+	this.Resize(
+		document.documentElement.clientWidth - 10,
+		document.documentElement.clientHeight - 10,
+		this.worldHeight / this.worldWidth
+	);
 
-	this.Resize(document.documentElement.clientWidth, document.documentElement.clientHeight, worldHeight / worldWidth);
 	this.clearCanvas();
 	var lastRender = 0;
+
 	window.requestAnimationFrame(this.Loop);
+
+	// Defining Object Classes
+	this.text = () => {
+		let text = {};
+		text.loc = { x: 0, y: 0 };
+		text.gravity = [0, -2];
+		text.velocity = [2, 2];
+
+		text.render = () => {
+			ctx.font = "48px serif";
+			ctx.fillText("Hello world", 10, 50);
+		};
+	};
+
+	// Sprite Class
+	this.sprite = o => {
+		let sprite = {};
+		sprite.frameIndex = 0;
+		sprite.tick = 0;
+		sprite.frameTicks = o._frameTicks || 0;
+		sprite.frameLength = o._frameLength || 1;
+		sprite.context = o._context;
+		sprite.width = o._width;
+		sprite.height = o._height;
+		sprite.loc = { x: o._x, y: o._y };
+		sprite.array = new Array();
+		sprite.image = new Image();
+		sprite.image.src = `./media/clicker/monster/${o._resource}.png`;
+		sprite.xmlhttp = new XMLHttpRequest();
+		sprite.frames;
+		sprite.renderReady = false;
+		sprite.currentFrame = document.createElement("canvas");
+		sprite.currentFrameContext = document.createElement("canvas").getContext("2d");
+		sprite.currentFrameContext.imageSmoothingEnabled = false;
+		sprite.gravity = [0, -2];
+		sprite.velocity = [2, 2];
+
+		sprite.xmlhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+				sprite.frames = JSON.parse(this.responseText).frames;
+				sprite.frameLength = Object.keys(sprite.frames).length; // Size of the object.
+				for (var name in sprite.frames) sprite.array.push(name);
+				console.log(sprite.array);
+				sprite.renderReady = true; // Image Loaded Ready for render.
+				delete sprite.xmlhttp; //remove this since we don't need it anymore.
+			}
+		};
+		sprite.xmlhttp.open("GET", `./media/clicker/monster/${o._resource}.json`, true);
+		sprite.xmlhttp.send();
+
+		sprite.update = function() {
+			sprite.tick += 1;
+
+			if (sprite.tick > sprite.frameTicks) {
+				sprite.tick = 0;
+				sprite.frameIndex++;
+				sprite.frameIndex %= sprite.frameLength;
+			}
+		};
+
+		sprite.render = function(x, y) {
+			if (!sprite.renderReady) return; // Check if the image has been loaded.
+			//sprite.context.clearRect(0, 0, that.width, that.height);
+			//console.log(this);
+			//console.log(sprite);
+			let name = this.array[sprite.frameIndex];
+			//console.log(this.array[sprite._frameIndex]);
+			//console.log(sprite.frames[name]);
+			sprite.currentFrame.width = sprite.frames[name].frame.w;
+			sprite.currentFrame.height = sprite.frames[name].frame.h;
+			sprite.currentFrameContext.clearRect(0, 0, sprite.currentFrame.width, sprite.currentFrame.height); // Clear the temp canvas that is going to hold our current frame.
+			sprite.currentFrameContext.drawImage(
+				// Draw the current frame to our canvas.
+				sprite.image,
+				sprite.frames[name].frame.x,
+				sprite.frames[name].frame.y,
+				sprite.frames[name].frame.w,
+				sprite.frames[name].frame.h,
+				0, //sprite.loc.x, // Might make this a parameter at render.
+				0, //sprite.loc.y, // Might make this a parameter at render.
+				sprite.width,
+				sprite.height
+			);
+			sprite.context.drawImage(sprite.currentFrameContext.canvas, x, y); // Draw the current frame canvas to our buffer canvas.
+		};
+
+		return sprite;
+	};
+
+	var bird = this.sprite({
+		_context: bContext,
+		_width: 122,
+		_height: 114,
+		_x: 100,
+		_y: 100,
+		_frameTicks: 10,
+		_resource: "bird"
+	});
+
+	//Monster Class (Basically the monster class inherits from sprite.)
+	this.monster = o => {
+		let monster = {};
+		monster.maxHealth = o._maxHealth;
+		monster.health = monster.maxHealth;
+		monster.name = o._name;
+		monster.sprite = o._sprite;
+		monster.width = monster.sprite.width;
+		monster.height = monster.sprite.height;
+		monster.loc = {
+			x: o._x || self.worldWidth / 2 - monster.width / 2,
+			y: o._y || self.worldHeight / 2 - monster.height / 2
+		};
+		monster.image = monster.sprite.image;
+		monster.frame = monster.sprite.currentFrameContext;
+
+		monster.renderHp = () => {
+			bContext.fillStyle = "#00FF00";
+			bContext.fillRect(
+				// Here i'm creating the monsters HP bar and adjusting it's size.
+				monster.loc.x,
+				monster.loc.y + monster.height + 10,
+				Math.max(monster.width / (monster.maxHealth / monster.health), 0),
+				8
+			);
+		};
+		return monster;
+	};
+
+	var birdMonster = this.monster({
+		_maxHealth: 100,
+		_name: "Falcon",
+		_sprite: bird
+	});
+
+	clickable.push(birdMonster);
 };
 
 Clicker.prototype = { constructor: Clicker };

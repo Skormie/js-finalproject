@@ -101,6 +101,17 @@ window.onload = function(event) {
 		game.update();
 	};
 
+	var onResize = function() {
+		resize();
+		if (clickgame != undefined) {
+			clickgame.Resize(
+				document.documentElement.clientWidth - 10,
+				document.documentElement.clientHeight - 10,
+				clickgame.worldHeight / clickgame.worldWidth
+			);
+		}
+	};
+
 	//Objects
 	var controller = new Controller();
 	var view = new View(document.querySelector("canvas"));
@@ -112,7 +123,7 @@ window.onload = function(event) {
 
 	window.onkeydown = keyPressed;
 	window.onkeyup = keyPressed;
-	window.onresize = resize;
+	window.onresize = onResize;
 
 	resize();
 
