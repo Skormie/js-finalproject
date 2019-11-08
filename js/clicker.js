@@ -7,8 +7,10 @@ const Clicker = function() {
 	let bContext = bCanvas.getContext("2d");
 	let background = new Image();
 	let clickable = new Array();
+	let textObjects = new Array();
 	let damage = 10;
-	let deltatime = 0;
+	let deltaTime = 0;
+	this.i;
 	background.src = "./media/clicker/background/parallax-mountain.png";
 	this.worldHeight = 135 * 2;
 	this.worldWidth = 256 * 2;
@@ -25,20 +27,16 @@ const Clicker = function() {
 	this.clearCanvas = () => {
 		bContext.resetTransform();
 		bContext.drawImage(background, 0, 0, bContext.canvas.width, bContext.canvas.height); // Each frame I'm rewriting the canvas with the background image.
-		bContext.fillStyle = "#FF0000";
-		bContext.fillRect(150, 56, 8, 8);
+		//bContext.fillStyle = "#FF0000";
+		//bContext.fillRect(150, 56, 8, 8);
 	};
 
 	this.DrawSquare = (x, y, w, h, c = "#FF0000") => {
-		bContext.fillStyle = c;
+		//bContext.fillStyle = c;
 		bContext.fillRect(x - w / 2, y - h / 2, w, h);
 	};
 
 	this.Draw = (x, y) => {
-		// console.log("bCanvas W", bCanvas.canvas.width);
-		// console.log("bCanvas H", bCanvas.canvas.height);
-		// console.log("Canvas W", context.canvas.width);
-		// console.log("Canvas H", context.canvas.height);
 		context.drawImage(
 			bContext.canvas,
 			0,
@@ -52,18 +50,30 @@ const Clicker = function() {
 		);
 	};
 
-	this.Update = deltatime => {
+	this.Update = deltaTime => {
 		// Update the state of the world for the elapsed time since last render
 		birdMonster.sprite.update();
 		birdMonster.sprite.render(birdMonster.loc.x, birdMonster.loc.y);
+		textObjects.forEach(text => {
+			//console.log(deltaTime);
+			text.update(deltaTime);
+			text.render();
+		});
 		birdMonster.renderHp();
 	};
 
+	//var lastTs = Date.now();
+	var delta = 0;
 	this.Loop = timestamp => {
-		deltatime = timestamp - lastRender;
+		deltaTime = timestamp - lastRender;
 		//console.log("loop test");
-		deltatime = min(deltatime, 0.15);
-		this.Update(deltatime);
+		//deltaTime = Math.min(deltaTime, 0.15);
+		deltaTime = deltaTime / 100; //- 6.9;
+		deltaTime = Math.min(deltaTime, 0.15);
+		//now = Date.now();
+		//delta = (now - lastTs) / 100;
+		//lastTs = now;
+		this.Update(deltaTime);
 		this.Draw();
 		this.clearCanvas();
 
@@ -83,13 +93,20 @@ const Clicker = function() {
 			) {
 				// Here I'm getting the current clicked pixel and checking if it is alpha.
 				let pixel = element.frame.getImageData(coord.x - element.loc.x, coord.y - element.loc.y, 1, 1).data;
-				console.log(element.frame);
 				if (pixel[3]) {
-					console.log("HIT");
 					if (element.hasOwnProperty("health")) {
-						console.log("Has HP");
-						if (element.health > 0) element.health -= damage;
-						else if (element.health < 0) element.health = 0;
+						if (element.health > 0) {
+							element.health -= damage;
+							textObjects.push(
+								self.text({
+									_context: bContext,
+									_x: coord.x,
+									_y: coord.y,
+									_txt: damage,
+									_color: "#FF0000"
+								})
+							);
+						} else if (element.health < 0) element.health = 0;
 					}
 				}
 			}
@@ -121,23 +138,37 @@ const Clicker = function() {
 		this.worldHeight / this.worldWidth
 	);
 
-	this.clearCanvas();
-	var lastRender = 0;
-
-	window.requestAnimationFrame(this.Loop);
-
 	// Defining Object Classes
-	this.text = () => {
+	this.text = o => {
 		let text = {};
-		text.loc = { x: 0, y: 0 };
-		text.gravity = [0, -2];
-		text.velocity = [2, 2];
+		text.loc = [o._x, o._y];
+		text.gravity = [0, -10];
+		text.velocity = [10, 10];
+		text.context = o._context;
+		text.context.font = "12px Minecraft";
+		text.txt = o._txt;
+		text.color = o._color || "#FF0000";
 
-		text.render = () => {
-			ctx.font = "48px serif";
-			ctx.fillText("Hello world", 10, 50);
+		text.render = (color = text.color) => {
+			text.context.fillStyle = color;
+			text.context.fillText(text.txt, text.loc[0], text.loc[1]);
 		};
+
+		text.update = deltaTime => {
+			text.loc[0] = text.loc[0] + text.velocity[0] * deltaTime;
+			text.loc[1] = text.loc[1] - text.velocity[1] * deltaTime;
+			text.velocity[0] = text.velocity[0] + text.gravity[0] * deltaTime;
+			text.velocity[1] = text.velocity[1] + text.gravity[1] * deltaTime;
+		};
+
+		return text;
 	};
+
+	var hitText = this.text({
+		_context: bContext,
+		_x: 100,
+		_y: 100
+	});
 
 	// Sprite Class
 	this.sprite = o => {
@@ -260,6 +291,11 @@ const Clicker = function() {
 	});
 
 	clickable.push(birdMonster);
+
+	this.clearCanvas();
+	var lastRender = 0;
+
+	window.requestAnimationFrame(this.Loop);
 };
 
 Clicker.prototype = { constructor: Clicker };

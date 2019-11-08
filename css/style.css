@@ -1,3 +1,11 @@
+@font-face {
+	font-family: "Minecraft";
+	src: url("../font/Minecraft.eot"); /* IE9 Compat Modes */
+	src: url("../font/Minecraft.eot?#iefix") format("embedded-opentype"), url("../font/Minecraft.woff2") format("woff2"),
+		url("../font/Minecraft.woff") format("woff"), url("../font/Minecraft.ttf") format("truetype"),
+		url("../font/Minecraft.svg#Minecraft") format("svg");
+}
+
 * {
 	box-sizing: border-box;
 	margin: 0;
